@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>proxy</title>
+  </head>
+  <body></body>
+  <script>
+    //************************************* problem**********************
+    // Bank account object
+    const bankAccount = {
+      owner: "Jane Doe",
+      balance: 1000,
+      transactions: ["Deposit: $1000"],
+    };
+
+    // Directly accessing and modifying sensitive data
+    console.log(bankAccount.transactions); // Anyone can access the transaction log
+
+    bankAccount.balance = 5000; // The balance can be changed without any restriction
+    console.log(bankAccount.balance); // Output: 5000
+
+    // **************************************solution ********************************
+    // Bank account object
+    const bankAccount = {
+      owner: "Jane Doe",
+      balance: 1000,
+      transactions: ["Deposit: $1000"],
+    };
+
+    // Proxy to control access to the bank account data
+    const bankAccountProxy = new Proxy(bankAccount, {
+      // Restrict access to sensitive data (transactions)
+      get(target, prop) {
+        if (prop === "transactions") {
+          return "Access Denied: Only authorized staff can view transactions";
+        }
+        return target[prop];
+      },
+
+      // Prevent modifications to sensitive properties (balance)
+      set(target, prop, value) {
+        if (prop === "balance") {
+          console.log("Balance cannot be modified directly!");
+          return false;
+        }
+        target[prop] = value;
+        return true;
+      },
+    });
+
+    // Example Usage
+    console.log(bankAccountProxy.balance); // Output: 1000
+    console.log(bankAccountProxy.transactions); // Output: Access Denied: Only authorized staff can view transactions
+
+    bankAccountProxy.balance = 5000; // Output: Balance cannot be modified directly!
+    console.log(bankAccountProxy.balance); // Output: 1000 (balance remains unchanged)
+  </script>
+</html>
